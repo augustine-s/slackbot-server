@@ -17,8 +17,8 @@ def index():
 
 @app.get('/bot_auth')
 async def bot_auth(code : str, state : str = Optional[None]):
-    print(code, state)
-    response = requests.post("https://slack.com/api/oauth.v2.access", data={"client_id" : "5145206166352.5121408209219" , "client_secret" : "8b2c0a823d5b2d0b60d08d0c5dcb8fcb" , "code" : code})
+    global CLIENT_ID, CLIENT_SECRET
+    response = requests.post("https://slack.com/api/oauth.v2.access", data={"client_id" : CLIENT_ID , "client_secret" : CLIENT_SECRET , "code" : code})
     raw = json.loads(response.content.decode('ascii'))
     dump_into_db(raw)
     return {"Bot Install" : "Successfull"}
@@ -62,11 +62,13 @@ async def receive_events(req : Request, ):
     
 @app.on_event("startup")
 def startup():
-    global BEARER_TOKEN
-    global LINK
-    global U_TIME
+    global BEARER_TOKEN, LINK, U_TIME, CLIENT_ID, CLIENT_SECRET
     U_TIME = 0
     BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
     LINK = os.environ.get("LINK")
+    CLIENT_ID = os.environ.get("CLIENT_ID")
+    CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+    assert CLIENT_ID is not None
+    assert CLIENT_SECRET is not None
     assert BEARER_TOKEN is not None
     assert LINK is not None
